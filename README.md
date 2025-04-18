@@ -2,8 +2,7 @@ using System;
 
 class Node
 {
-    public string Content;
-    public Node Next;
+    public string Content; public Node Next;
 
     public Node(string content)
     {
@@ -145,7 +144,13 @@ class Program
             Console.WriteLine("5. Hiển thị danh sách");
             Console.WriteLine("0. Thoát");
             Console.Write("Chọn chức năng: ");
-            choice = int.Parse(Console.ReadLine());
+            string input = Console.ReadLine();
+            if (!int.TryParse(input, out choice))
+            {
+                Console.WriteLine("❌ Vui lòng nhập một số hợp lệ.");
+                choice = -1; // Gán giá trị không hợp lệ để vòng lặp tiếp tục
+            }
+
 
             switch (choice)
             {
