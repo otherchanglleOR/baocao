@@ -130,64 +130,122 @@ class Program
     {
         Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-        LinkedList todoList = new LinkedList();
-        LinkedList doneList = new LinkedList();
+        Dictionary<string, LinkedList> lists = new Dictionary<string, LinkedList>();
+        string currentListName = "";
 
         int choice;
         do
         {
             Console.WriteLine("\n===== MENU =====");
-            Console.WriteLine("1. Thêm ghi chú");
-            Console.WriteLine("2. Xoá ghi chú");
-            Console.WriteLine("3. Sửa ghi chú");
-            Console.WriteLine("4. Di chuyển ghi chú sang danh sách ĐÃ HOÀN THÀNH");
-            Console.WriteLine("5. Hiển thị danh sách");
+            Console.WriteLine("1. Tạo danh sách mới");
+            Console.WriteLine("2. Chọn danh sách để làm việc");
+            Console.WriteLine("3. Thêm ghi chú");
+            Console.WriteLine("4. Xoá ghi chú");
+            Console.WriteLine("5. Sửa ghi chú");
+            Console.WriteLine("6. Di chuyển ghi chú sang danh sách khác");
+            Console.WriteLine("7. Hiển thị tất cả danh sách");
             Console.WriteLine("0. Thoát");
             Console.Write("Chọn chức năng: ");
+
             string input = Console.ReadLine();
             if (!int.TryParse(input, out choice))
             {
                 Console.WriteLine("❌ Vui lòng nhập một số hợp lệ.");
-                choice = -1; // Gán giá trị không hợp lệ để vòng lặp tiếp tục
+                choice = -1;
+                continue;
             }
-
 
             switch (choice)
             {
                 case 1:
+                    Console.Write("Nhập tên danh sách mới: ");
+                    string newListName = Console.ReadLine();
+                    if (!lists.ContainsKey(newListName))
+                    {
+                        lists[newListName] = new LinkedList();
+                        Console.WriteLine($"✅ Đã tạo danh sách '{newListName}'.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("⚠️ Danh sách này đã tồn tại.");
+                    }
+                    break;
+
+                case 2:
+                    Console.Write("Nhập tên danh sách để chọn: ");
+                    string listToSelect = Console.ReadLine();
+                    if (lists.ContainsKey(listToSelect))
+                    {
+                        currentListName = listToSelect;
+                        Console.WriteLine($"📌 Đang làm việc với danh sách '{currentListName}'.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("❌ Danh sách không tồn tại.");
+                    }
+                    break;
+
+                case 3:
+                    if (!CheckListSelected(currentListName, lists)) break;
                     Console.Write("Nhập nội dung ghi chú mới: ");
                     string note = Console.ReadLine();
-                    todoList.AddNote(note);
+                    lists[currentListName].AddNote(note);
                     break;
-                case 2:
+
+                case 4:
+                    if (!CheckListSelected(currentListName, lists)) break;
                     Console.Write("Nhập nội dung ghi chú cần xoá: ");
                     string delNote = Console.ReadLine();
-                    todoList.RemoveNote(delNote);
+                    lists[currentListName].RemoveNote(delNote);
                     break;
-                case 3:
+
+                case 5:
+                    if (!CheckListSelected(currentListName, lists)) break;
                     Console.Write("Nhập nội dung cũ: ");
                     string oldNote = Console.ReadLine();
                     Console.Write("Nhập nội dung mới: ");
                     string newNote = Console.ReadLine();
-                    todoList.EditNote(oldNote, newNote);
+                    lists[currentListName].EditNote(oldNote, newNote);
                     break;
-                case 4:
+
+                case 6:
+                    if (!CheckListSelected(currentListName, lists)) break;
                     Console.Write("Nhập nội dung ghi chú cần di chuyển: ");
                     string moveNote = Console.ReadLine();
-                    todoList.MoveNoteTo(doneList, moveNote);
+                    Console.Write("Nhập tên danh sách đích: ");
+                    string targetList = Console.ReadLine();
+                    if (!lists.ContainsKey(targetList))
+                    {
+                        Console.WriteLine("❌ Danh sách đích không tồn tại.");
+                        break;
+                    }
+                    lists[currentListName].MoveNoteTo(lists[targetList], moveNote);
                     break;
-                case 5:
-                    todoList.Print("Danh sách TODO");
-                    doneList.Print("Danh sách ĐÃ HOÀN THÀNH");
+
+                case 7:
+                    foreach (var listName in lists.Keys)
+                        lists[listName].Print($"📋 {listName}");
                     break;
+
                 case 0:
-                    Console.WriteLine("Thoát chương trình.");
+                    Console.WriteLine("👋 Thoát chương trình.");
                     break;
+
                 default:
                     Console.WriteLine("❌ Lựa chọn không hợp lệ.");
                     break;
             }
 
         } while (choice != 0);
+    }
+
+    static bool CheckListSelected(string currentList, Dictionary<string, LinkedList> lists)
+    {
+        if (string.IsNullOrEmpty(currentList) || !lists.ContainsKey(currentList))
+        {
+            Console.WriteLine("⚠️ Vui lòng chọn danh sách hợp lệ trước.");
+            return false;
+        }
+        return true;
     }
 }
